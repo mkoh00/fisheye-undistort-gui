@@ -217,3 +217,244 @@ input[type='number']:focus {
 .image-viewer {
   position: relative;
 }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 72px;
+  flex-shrink: 0;
+  background: #222;
+  border-right: 1px solid #3a3a3a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  gap: 4px;
+}
+
+.sidebar-btn {
+  width: 60px;
+  padding: 10px 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-btn:hover {
+  background: #2d2d2d;
+  color: #ccc;
+}
+
+.sidebar-btn.active {
+  background: #1a3a5c;
+  border-color: #4a8fff;
+  color: #4a8fff;
+}
+
+.sidebar-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.sidebar-label {
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ── Parking Setup ── */
+.parking-setup {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1c1c1c;
+}
+
+.setup-card {
+  background: #2d2d2d;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 360px;
+}
+
+.setup-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #d0d0d0;
+  margin-bottom: 4px;
+}
+
+.setup-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setup-label {
+  width: 80px;
+  font-size: 11px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.setup-hint {
+  font-size: 11px;
+  color: #666;
+}
+
+.setup-hint.ok {
+  color: #00e676;
+}
+
+.count-input {
+  width: 64px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: #d0d0d0;
+  padding: 4px 8px;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.create-btn {
+  margin-top: 8px;
+  padding: 8px 0;
+  background: #1a3a5c;
+  border: 1px solid #4a8fff;
+  color: #4a8fff;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.create-btn:hover:not(:disabled) {
+  background: #1e4a7a;
+}
+
+.create-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Parking Edit Layout ── */
+.parking-edit-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.parking-canvas-wrap {
+  flex: 1;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.parking-bottom {
+  flex-shrink: 0;
+  background: #2d2d2d;
+  border-top: 1px solid #3a3a3a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+
+.space-list {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.space-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #1a1a1a;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.space-row.active {
+  border-color: #4a8fff;
+  background: #1a2a3a;
+}
+
+.space-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.space-num {
+  font-size: 10px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.space-id-label {
+  font-size: 10px;
+  color: #666;
+}
+
+.space-id-input {
+  width: 52px;
+  background: #111;
+  border: 1px solid #555;
+  color: #d0d0d0;
+  padding: 2px 5px;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 11px;
+  border-radius: 2px;
+  text-align: center;
+}
+
+.space-id-input:focus {
+  outline: 1px solid #4a8fff;
+  border-color: #4a8fff;
+}
+
+.parking-bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.save-json-btn {
+  background: #1a3a1a !important;
+  border-color: #00e676 !important;
+  color: #00e676 !important;
+}
+
+.save-json-btn:hover {
+  background: #1e4a1e !important;
+}
