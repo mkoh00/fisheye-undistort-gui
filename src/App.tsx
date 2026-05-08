@@ -5,6 +5,9 @@ import { waitForOpenCV } from './core/opencvReady'
 import { FisheyeUndistorter } from './core/fisheyeUndistorter'
 import { fromRawParams } from './core/undistortionParams'
 import { imreadFromFile, matToDataUrl } from './core/imageIo'
+import ParkingEditor from './ParkingEditor'
+
+type Page = 'undistort' | 'parking'
 
 type K4 = [number, number, number, number]
 
@@ -85,6 +88,7 @@ function ParamGroup({ title, labels, values, steps, stepInputStep, onValueChange
 // ── App ────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [page, setPage] = useState<Page>('undistort')
   const [cvReady, setCvReady] = useState(false)
   const [imageName, setImageName] = useState('')
   const [params, setParams] = useState<RawParams>(DEFAULT_PARAMS)
@@ -225,132 +229,157 @@ export default function App() {
   const hasImage = !!imageName
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      {/* Toolbar */}
-      <div className="toolbar">
-        <button className="btn" onClick={() => fileInputRef.current?.click()}>
-          Select Image File
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".jpg,.jpeg,.png"
-          style={{ display: 'none' }}
-          onChange={e => {
-            if (e.target.files?.[0]) handleImageFile(e.target.files[0])
-            e.target.value = ''
-          }}
-        />
-        <span className="filepath">{imageName || 'No file selected'}</span>
+    <div style={{ display: 'flex', height: '100vh' }}>
+      {/* Sidebar */}
+      <nav className="sidebar">
         <button
-          className="btn"
-          onClick={doProcess}
-          disabled={!cvReady || !hasImage || processing}
+          className={`sidebar-btn ${page === 'undistort' ? 'active' : ''}`}
+          onClick={() => setPage('undistort')}
         >
-          {!cvReady ? 'Loading OpenCV…' : processing ? 'Processing…' : 'Refresh'}
+          <span className="sidebar-icon">🔧</span>
+          <span className="sidebar-label">언디스토션</span>
         </button>
-      </div>
+        <button
+          className={`sidebar-btn ${page === 'parking' ? 'active' : ''}`}
+          onClick={() => setPage('parking')}
+        >
+          <span className="sidebar-icon">🅿</span>
+          <span className="sidebar-label">주차면</span>
+        </button>
+      </nav>
 
-      {/* Image panels */}
-      <div className="image-viewer">
-        {processing && (
-          <div className="processing-overlay">Processing…</div>
-        )}
-        <div className="image-panel">
-          {originalDataUrl
-            ? <img src={originalDataUrl} alt="original with boundaries" />
-            : <span className="placeholder">Original Image</span>}
-        </div>
-        <div className="image-panel">
-          {undistortedDataUrl
-            ? <img src={undistortedDataUrl} alt="undistorted" />
-            : <span className="placeholder">Undistorted Image</span>}
-        </div>
-      </div>
-
-      {/* Parameter controls */}
-      <div className="controls">
-        <div className="param-groups">
-          <ParamGroup
-            title="K Matrix"
-            labels={['fx', 'fy', 'cx', 'cy']}
-            values={[...params.k]}
-            steps={[...steps.k]}
-            stepInputStep={1}
-            onValueChange={(i, v) => updateParam('k', i, v)}
-            onStepChange={(i, v) => updateStep('k', i, v)}
-          />
-          <ParamGroup
-            title="D Coefficients"
-            labels={['k1', 'k2', 'k3', 'k4']}
-            values={[...params.d]}
-            steps={[...steps.d]}
-            stepInputStep={0.001}
-            onValueChange={(i, v) => updateParam('d', i, v)}
-            onStepChange={(i, v) => updateStep('d', i, v)}
-          />
-          <ParamGroup
-            title="P Matrix"
-            labels={['fx', 'fy', 'cx', 'cy']}
-            values={[...params.p]}
-            steps={[...steps.p]}
-            stepInputStep={1}
-            onValueChange={(i, v) => updateParam('p', i, v)}
-            onStepChange={(i, v) => updateStep('p', i, v)}
-          />
-          <div className="param-group">
-            <h4>Rotation</h4>
-            <div className="param-row">
-              <span className="param-label">angle:</span>
+      {/* Page content */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {page === 'parking' ? <ParkingEditor /> : (
+          <>
+            {/* Toolbar */}
+            <div className="toolbar">
+              <button className="btn" onClick={() => fileInputRef.current?.click()}>
+                이미지 선택
+              </button>
               <input
-                type="number"
-                className="param-value"
-                value={params.r}
-                step={steps.r}
+                ref={fileInputRef}
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                style={{ display: 'none' }}
                 onChange={e => {
-                  const v = parseFloat(e.target.value)
-                  if (!isNaN(v)) setParams(prev => ({ ...prev, r: v }))
+                  if (e.target.files?.[0]) handleImageFile(e.target.files[0])
+                  e.target.value = ''
                 }}
               />
-              <input
-                type="number"
-                className="param-step"
-                value={steps.r}
-                step={0.1}
-                min={0.00001}
-                onChange={e => {
-                  const v = parseFloat(e.target.value)
-                  if (!isNaN(v) && v > 0) setSteps(prev => ({ ...prev, r: v }))
-                }}
-              />
+              <span className="filepath">{imageName || '파일 선택 안됨'}</span>
+              <button
+                className="btn"
+                onClick={doProcess}
+                disabled={!cvReady || !hasImage || processing}
+              >
+                {!cvReady ? 'OpenCV 로딩…' : processing ? '처리중…' : '새로고침'}
+              </button>
             </div>
-          </div>
-        </div>
 
-        <div className="action-buttons">
-          <input
-            ref={jsonInputRef}
-            type="file"
-            accept=".json"
-            style={{ display: 'none' }}
-            onChange={e => {
-              if (e.target.files?.[0]) handleLoadParams(e.target.files[0])
-              e.target.value = ''
-            }}
-          />
-          <button className="action-btn" onClick={() => jsonInputRef.current?.click()}>
-            Load Parameters
-          </button>
-          <button className="action-btn" onClick={handleSaveParams}>
-            Save Parameters
-          </button>
-          <button className="action-btn" onClick={() => setParams(baseParams)}>
-            Reset Parameters
-          </button>
-          <button className="action-btn" onClick={handleSaveImage} disabled={!undistortedDataUrl}>
-            Save Image
-          </button>
-        </div>
+            {/* Image panels */}
+            <div className="image-viewer">
+              {processing && (
+                <div className="processing-overlay">처리중…</div>
+              )}
+              <div className="image-panel">
+                {originalDataUrl
+                  ? <img src={originalDataUrl} alt="original with boundaries" />
+                  : <span className="placeholder">원본 이미지</span>}
+              </div>
+              <div className="image-panel">
+                {undistortedDataUrl
+                  ? <img src={undistortedDataUrl} alt="undistorted" />
+                  : <span className="placeholder">보정된 이미지</span>}
+              </div>
+            </div>
+
+            {/* Parameter controls */}
+            <div className="controls">
+              <div className="param-groups">
+                <ParamGroup
+                  title="K Matrix"
+                  labels={['fx', 'fy', 'cx', 'cy']}
+                  values={[...params.k]}
+                  steps={[...steps.k]}
+                  stepInputStep={1}
+                  onValueChange={(i, v) => updateParam('k', i, v)}
+                  onStepChange={(i, v) => updateStep('k', i, v)}
+                />
+                <ParamGroup
+                  title="D Coefficients"
+                  labels={['k1', 'k2', 'k3', 'k4']}
+                  values={[...params.d]}
+                  steps={[...steps.d]}
+                  stepInputStep={0.001}
+                  onValueChange={(i, v) => updateParam('d', i, v)}
+                  onStepChange={(i, v) => updateStep('d', i, v)}
+                />
+                <ParamGroup
+                  title="P Matrix"
+                  labels={['fx', 'fy', 'cx', 'cy']}
+                  values={[...params.p]}
+                  steps={[...steps.p]}
+                  stepInputStep={1}
+                  onValueChange={(i, v) => updateParam('p', i, v)}
+                  onStepChange={(i, v) => updateStep('p', i, v)}
+                />
+                <div className="param-group">
+                  <h4>Rotation</h4>
+                  <div className="param-row">
+                    <span className="param-label">angle:</span>
+                    <input
+                      type="number"
+                      className="param-value"
+                      value={params.r}
+                      step={steps.r}
+                      onChange={e => {
+                        const v = parseFloat(e.target.value)
+                        if (!isNaN(v)) setParams(prev => ({ ...prev, r: v }))
+                      }}
+                    />
+                    <input
+                      type="number"
+                      className="param-step"
+                      value={steps.r}
+                      step={0.1}
+                      min={0.00001}
+                      onChange={e => {
+                        const v = parseFloat(e.target.value)
+                        if (!isNaN(v) && v > 0) setSteps(prev => ({ ...prev, r: v }))
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="action-buttons">
+                <input
+                  ref={jsonInputRef}
+                  type="file"
+                  accept=".json"
+                  style={{ display: 'none' }}
+                  onChange={e => {
+                    if (e.target.files?.[0]) handleLoadParams(e.target.files[0])
+                    e.target.value = ''
+                  }}
+                />
+                <button className="action-btn" onClick={() => jsonInputRef.current?.click()}>
+                  파라미터 불러오기
+                </button>
+                <button className="action-btn" onClick={handleSaveParams}>
+                  파라미터 저장
+                </button>
+                <button className="action-btn" onClick={() => setParams(baseParams)}>
+                  파라미터 초기화
+                </button>
+                <button className="action-btn" onClick={handleSaveImage} disabled={!undistortedDataUrl}>
+                  이미지 저장
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
