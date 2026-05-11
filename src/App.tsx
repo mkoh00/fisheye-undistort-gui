@@ -205,7 +205,10 @@ export default function App() {
 
   const handleSaveImage = () => {
     if (!undistortedDataUrl) return
-    triggerDownload(undistortedDataUrl, imageName ? `undistorted_${imageName}` : 'undistorted.jpg')
+    const baseName = imageName ? `undistorted_${imageName.replace(/\.[^.]+$/, '')}` : 'undistorted'
+    triggerDownload(undistortedDataUrl, `${baseName}.jpg`)
+    const blob = new Blob([JSON.stringify(params, null, 4)], { type: 'application/json' })
+    triggerDownload(URL.createObjectURL(blob), `${baseName}.json`)
   }
 
   // ── Param updaters ──────────────────────────────────────────────────────
